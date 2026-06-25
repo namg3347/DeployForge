@@ -1,5 +1,6 @@
 package com.redhat.deployforge.security;
 
+import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,17 +24,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(auth ->auth
-                .requestMatchers(HttpMethod.POST,"/auth/**").permitAll()
-//                .requestMatchers("/user","/journal/**").authenticated()
-//                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated())
+        return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex->
+                        ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .authorizeHttpRequests(auth ->auth
+                .requestMatchers(HttpMethod.POST,"/auth/**").permitAll()
+//                .requestMatchers("/users","/deployments/**").authenticated()
+//                .requestMatchers("/admins/**").hasRole("ADMIN")
+                .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

@@ -50,11 +50,7 @@ public class AuthUtil {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        try {
-            final String email = extractEmail(token);
-            return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
-        } catch (Exception e) {
-            return false;
-        }
+        final String email = extractEmail(token);
+        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }

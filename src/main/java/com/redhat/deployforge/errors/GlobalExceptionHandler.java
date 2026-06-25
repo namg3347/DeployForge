@@ -1,6 +1,7 @@
 package com.redhat.deployforge.errors;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -45,6 +46,16 @@ public class GlobalExceptionHandler {
                 HttpStatus.UNAUTHORIZED,
                 "Your login session has expired. Please log in again.",
                 "Authentication Failed"
+        );
+        return new ResponseEntity<>(error, error.getStatus());
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiError> handleJwtException(JwtException ex) {
+        ApiError error = new ApiError(
+                HttpStatus.FORBIDDEN,
+                "Invalid or no authentication token provided.",
+                "No login session.Please log in."
         );
         return new ResponseEntity<>(error, error.getStatus());
     }
