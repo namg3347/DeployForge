@@ -1,0 +1,23 @@
+spring:
+  application:
+    name : deployforge
+  datasource:
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+  data:
+    redis:
+      url: ${REDIS_URL}
+      ssl:
+        enabled: false
+server:
+  servlet:
+    context-path: /api/v1
