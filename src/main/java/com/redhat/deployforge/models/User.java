@@ -1,5 +1,6 @@
 package com.redhat.deployforge.models;
 
+import com.redhat.deployforge.enums.UserAuthProvider;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,8 @@ import java.util.List;
 @Builder
 @Table(name = "users",
     indexes = {
-        @Index(name ="idx_user_name",columnList = "user_name")
+        @Index(name ="idx_user_name",columnList = "user_name"),
+        @Index(name = "provider_id_provider_type",columnList = "user_auth_provider_id,user_auth_provider_type")
     })
 public class User implements UserDetails {
 
@@ -33,11 +35,19 @@ public class User implements UserDetails {
     private String username;
     @Column(name = "email", nullable = false,length=255,unique = true)
     private String email;
-    @Column(name = "password", nullable = false)
+    @Column(name = "password") // nullable bcz of Oauth
     private String password;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_auth_provider_type")
+    private UserAuthProvider userAuthProvider;
+
+    @Column(name = "user_auth_provider_id")
+    private String authProviderId;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -4,6 +4,7 @@ import com.redhat.deployforge.dtos.UserLoginRequestDto;
 import com.redhat.deployforge.dtos.UserLoginResponseDto;
 import com.redhat.deployforge.dtos.UserSignUpRequestDto;
 import com.redhat.deployforge.dtos.UserSignUpResponseDto;
+import com.redhat.deployforge.enums.UserAuthProvider;
 import com.redhat.deployforge.mappers.UserMapper;
 import com.redhat.deployforge.models.User;
 import com.redhat.deployforge.services.UserService;
@@ -36,6 +37,7 @@ public class AuthService {
 
     public UserSignUpResponseDto signup(UserSignUpRequestDto userSignUpRequestDto) {
         User user = userMapper.toEntity(userSignUpRequestDto);
+        user.setUserAuthProvider(UserAuthProvider.EMAIL);
         log.info("user entered auth service signup");
         userService.registerUser(user);
         return userMapper.toDto(user);

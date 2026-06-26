@@ -92,4 +92,12 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),ex.getStatusCode());
         return new ResponseEntity<>(error, error.getStatus());
     }
+
+    @ExceptionHandler(OAuth2ResponseStatusException.class)
+    public ResponseEntity<ApiError> handleOAuth2ResponseStatusException(OAuth2ResponseStatusException ex) {
+
+        ApiError error = new ApiError(ex.getHttpStatus(),
+                ex.getMessage(),ex.getStatusCode());
+        return new ResponseEntity<>(error, error.getStatus());
+    }
 }

@@ -1,6 +1,18 @@
 spring:
   application:
     name : deployforge
+#oauth security
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${OAUTH_GOOGLE_CLIENT_ID}
+            client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
+          github:
+            client-id: sdfafg
+            client-secret: ewtasftrr
+#datasources database and redis
   datasource:
     url: ${POSTGRES_URL}
     username: ${POSTGRES_USER}
@@ -18,6 +30,7 @@ spring:
       url: ${REDIS_URL}
       ssl:
         enabled: false
+#context path
 server:
   servlet:
     context-path: /api/v1

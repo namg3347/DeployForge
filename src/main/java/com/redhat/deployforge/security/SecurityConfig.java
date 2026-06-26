@@ -1,7 +1,7 @@
 package com.redhat.deployforge.security;
 
-import io.jsonwebtoken.Jwt;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,8 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -21,13 +19,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("entering securityFilterChain");
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sessionConfig ->
@@ -35,20 +36,19 @@ public class SecurityConfig {
                 .exceptionHandling(ex->
                         ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth ->auth
-                .requestMatchers(HttpMethod.POST,"/auth/**").permitAll()
-//                .requestMatchers("/users","/deployments/**").authenticated()
-//                .requestMatchers("/admins/**").hasRole("ADMIN")
-                .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+                    .requestMatchers(HttpMethod.POST,"/auth/**").permitAll()
+                    .requestMatchers("/login", "/oauth2/**", "/login/oauth2/**").permitAll()
+//                  .requestMatchers("/users","/deployments/**").authenticated()
+//                  .requestMatchers("/admins/**").hasRole("ADMIN")
+                    .anyRequest().authenticated())
+                    .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                    .oauth2Login(oauth->oauth
+                        .failureHandler(
+                                (request, response, exception) ->
+                                        log.error(exception.getMessage(), exception)
+                        )
+                        .successHandler(oAuth2SuccessHandler))
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+                .build();
     }
 }
