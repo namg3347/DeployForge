@@ -48,7 +48,7 @@ public class OAuth2Service {
                     .build();
 
             String uniqueUsername = generateUniqueUserName(email);
-            newUser.setUsername(uniqueUsername);
+            newUser.setDisplayName(uniqueUsername);
             log.info("user is:{}", newUser);
             userService.registerUser(newUser);
 

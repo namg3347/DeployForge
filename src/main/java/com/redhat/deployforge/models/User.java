@@ -21,7 +21,7 @@ import java.util.List;
 @Builder
 @Table(name = "users",
     indexes = {
-        @Index(name ="idx_user_name",columnList = "user_name"),
+        @Index(name ="idx_display_name",columnList = "display_name"),
         @Index(name = "provider_id_provider_type",columnList = "user_auth_provider_id,user_auth_provider_type")
     })
 public class User implements UserDetails {
@@ -31,8 +31,8 @@ public class User implements UserDetails {
     @SequenceGenerator(name = "user_seq_gen", sequenceName = "users_user_id_seq", allocationSize = 1)
     @Column(name = "user_id")
     private Long userId;
-    @Column(name = "user_name",nullable = false,updatable = false,unique = true,length = 50)
-    private String username;
+    @Column(name = "display_name",nullable = false,updatable = false,unique = true,length = 50)
+    private String displayName;
     @Column(name = "email", nullable = false,length=255,unique = true)
     private String email;
     @Column(name = "password") // nullable bcz of Oauth
@@ -52,5 +52,10 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 }

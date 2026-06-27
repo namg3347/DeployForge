@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public void registerUser(User user) {
         log.info("user entered user service register");
-        if (userRepo.existsByUsername(user.getUsername())) {
+        if (userRepo.existsByDisplayName(user.getUsername())) {
             log.error("Registration failed: Username '{}' is already taken", user.getUsername());
             throw new UserAlreadyExistsException("User with this email already exists");
         }
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService{
                     return new UserNotFoundException();
                 });
 
-        existingUser.setUsername(user.getUsername());
+        existingUser.setDisplayName(user.getUsername());
         existingUser.setEmail(user.getEmail());
 
         userRepo.save(existingUser);
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public boolean existsByUsername(String username) {
-        return userRepo.existsByUsername(username);
+        return userRepo.existsByDisplayName(username);
     }
 
     @Override
