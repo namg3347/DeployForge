@@ -49,7 +49,7 @@ public class OAuth2Service {
 
             String uniqueUsername = generateUniqueUserName(email);
             newUser.setUsername(uniqueUsername);
-            log.info("user is:{}", newUser.toString());
+            log.info("user is:{}", newUser);
             userService.registerUser(newUser);
 
             String token = authUtil.generateAccessToken(newUser);

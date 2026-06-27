@@ -10,8 +10,10 @@ spring:
             client-id: ${OAUTH_GOOGLE_CLIENT_ID}
             client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
           github:
-            client-id: sdfafg
-            client-secret: ewtasftrr
+            client-id: ${OAUTH_GITHUB_CLIENT_ID}
+            client-secret: ${OAUTH_GITHUB_CLIENT_SECRET}
+            scope: user:email
+
 #datasources database and redis
   datasource:
     url: ${POSTGRES_URL}
