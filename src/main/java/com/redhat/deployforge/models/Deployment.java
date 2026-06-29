@@ -26,16 +26,19 @@ public class Deployment {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dpl_seq_gen")
     @SequenceGenerator(name = "dpl_seq_gen", sequenceName = "dpls_dpl_id_seq", allocationSize = 1)
-    private Long id;
+    private Long deploymentId;
 
     @Column(name="user_id",nullable = false,updatable = false,unique = true)
     private Long userId;
 
     @Column(name = "repo_name",nullable = false,updatable = false)
-    private String reponame;
+    private String repoName;
 
-    @Column(name = "repo_url",nullable = false,updatable = false,length = 255, unique = true)
+    @Column(name = "repo_url",nullable = false,updatable = false, unique = true)
     private String repoUrl;
+
+    @Column(name = "deployment_slug",unique = true,updatable = false)
+    private String deploymentSlug;
 
     @Column(name = "build_command",nullable = false,updatable = false)
     private String buildCommand;
@@ -47,12 +50,18 @@ public class Deployment {
     @Column(name = "created_at",updatable = false)
     private Instant createdAt;
 
+    @Column(name = "started_at",updatable = false)
+    private Instant startedAt;
+
     @Column(name = "deployed_at",updatable = false)
     private Instant deployedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "deployment_status", nullable = false)
     private DeploymentStatus status;
+
+    @Column(name = "error_message")
+    private String errorMessage;
 
 
 

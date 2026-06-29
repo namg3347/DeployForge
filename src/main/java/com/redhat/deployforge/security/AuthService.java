@@ -37,6 +37,7 @@ public class AuthService {
 
     public UserSignUpResponseDto signup(UserSignUpRequestDto userSignUpRequestDto) {
         User user = userMapper.toEntity(userSignUpRequestDto);
+        log.info("user display name {}",user.getDisplayName());
         user.setUserAuthProvider(UserAuthProvider.EMAIL);
         log.info("user entered auth service signup");
         userService.registerUser(user);

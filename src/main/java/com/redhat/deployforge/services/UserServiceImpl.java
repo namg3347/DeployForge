@@ -25,8 +25,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public void registerUser(User user) {
         log.info("user entered user service register");
-        if (userRepo.existsByDisplayName(user.getUsername())) {
-            log.error("Registration failed: Username '{}' is already taken", user.getUsername());
+        if (userRepo.existsByDisplayName(user.getDisplayName())) {
+            log.error("Registration failed: Username '{}' is already taken", user.getDisplayName());
             throw new UserAlreadyExistsException("User with this email already exists");
         }
 
@@ -41,8 +41,7 @@ public class UserServiceImpl implements UserService{
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         else {
-            // OAuth2 Users: If the email already exists, we should NOT create a duplicate user.
-            // The calling AuthService should ideally handle account linking before calling this.
+            // OAuth2 Users: If the email already exists, we will not create a duplicate user.
             if (emailExists) {
                 log.warn("OAuth registration intercepted: User with email '{}' already exists. Linking required.", user.getEmail());
                 throw new UserAlreadyExistsException("An account with this email already exists. Please log in using your original method.");
@@ -50,7 +49,7 @@ public class UserServiceImpl implements UserService{
         }
 
         userRepo.save(user);
-        log.info("user:{} saved", user.getUsername());
+        log.info("user:{} saved", user.getDisplayName());
     }
 
     @Override

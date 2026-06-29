@@ -100,4 +100,19 @@ public class GlobalExceptionHandler {
                 ex.getMessage(),ex.getStatusCode());
         return new ResponseEntity<>(error, error.getStatus());
     }
+    @ExceptionHandler(DeploymentAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleDeploymentAlreadyExistsException(DeploymentAlreadyExistsException ex) {
+
+        ApiError error = new ApiError(ex.getHttpStatus(),
+                ex.getMessage(),ex.getStatusCode());
+        return new ResponseEntity<>(error, error.getStatus());
+    }
+
+    @ExceptionHandler(UnableToGenerateSlugException.class)
+    public ResponseEntity<ApiError> handleUnableToGenerateSlugException(UnableToGenerateSlugException ex) {
+
+        ApiError error = new ApiError(ex.getHttpStatus(),
+                ex.getMessage(),ex.getStatusCode());
+        return new ResponseEntity<>(error, error.getStatus());
+    }
 }
