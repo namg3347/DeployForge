@@ -1,7 +1,10 @@
 package com.redhat.deployforge.services;
 
 import com.redhat.deployforge.dtos.CreateDeploymentRequestDto;
+import com.redhat.deployforge.dtos.CreateDeploymentResponseDto;
+import com.redhat.deployforge.dtos.DeploymentResponseDto;
 import com.redhat.deployforge.enums.DeploymentStatus;
+import com.redhat.deployforge.errors.DeploymentNotFoundException;
 import com.redhat.deployforge.errors.UnableToGenerateSlugException;
 import com.redhat.deployforge.mappers.DeploymentMapper;
 import com.redhat.deployforge.models.Deployment;
@@ -10,11 +13,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,11 +34,15 @@ public class DeploymentServiceImpl implements DeploymentService{
 
     @Override
     @Transactional
-    public void createDeployment(CreateDeploymentRequestDto requestDto) {
-        Deployment deployment = deploymentMapper.toEntity(requestDto);
-        deployment.setStatus(DeploymentStatus.QUEUED);
+    public CreateDeploymentResponseDto createDeployment(CreateDeploymentRequestDto requestDto, Long userId) {
+        log.info("dto:{}",requestDto);
+        Deployment deployment = deploymentMapper.createRequestToEntity(requestDto);
+
+        log.info("entity:{}",deployment);
+        deployment.setDeploymentStatus(DeploymentStatus.QUEUED);
+        deployment.setUserId(userId);
         //converting repoName to base slug for deployment url
-        String baseSlug = deployment.getRepoName().trim().toLowerCase()
+        String baseSlug = deployment.getProjectName().trim().toLowerCase()
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("^-+", "")
                 .replaceAll("-+$", "");
@@ -49,8 +56,14 @@ public class DeploymentServiceImpl implements DeploymentService{
 
                 // using saveAndFlush to force JPA to write to the database immediately.
                 // This triggers the UNIQUE constraint validation within this specific loop iteration.
+                log.info("entity:{}",deployment);
+
+                //rabbit publisher------------------------------------
+
                 deploymentRepo.saveAndFlush(deployment);
-                return;
+                CreateDeploymentResponseDto response =  deploymentMapper.entityToCreateResponse(deployment);
+                log.info("responseDto:{}",response);
+                return response;
             } catch (DataIntegrityViolationException e) {
                 log.warn("Slug collision for '{}', attempt {}/{}",
                         slug,
@@ -65,13 +78,36 @@ public class DeploymentServiceImpl implements DeploymentService{
     }
 
     @Override
-    public Optional<Deployment> getDeploymentById(Long deploymentId) {
-        return deploymentRepo.findById(deploymentId);
+    @Transactional
+    public DeploymentResponseDto redeployDeploymentById(Long deploymentId, Long userId) {
+        //if deployment already exists for the user
+        Deployment existing = deploymentRepo.findByDeploymentIdAndUserId(deploymentId,userId).orElseThrow(()->
+                new DeploymentNotFoundException("your deployment with this id:"+deploymentId+"not found,try creating a deployment first"));
+
+        existing.setDeploymentStatus(DeploymentStatus.QUEUED);
+        existing.setErrorMessage(null);
+        //rabbit publisher------------------------------------
+        deploymentRepo.save(existing);
+        return deploymentMapper.entityToResponse(existing);
     }
 
     @Override
-    public List<Deployment> getAllDeploymentsByUserId(Long userId) {
-        return deploymentRepo.findAllByUserId(userId);
+    public DeploymentResponseDto getDeploymentById(Long deploymentId, Long userId) {
+        Deployment deployment =  deploymentRepo.findByDeploymentIdAndUserId(deploymentId,userId).orElseThrow(()->
+                new DeploymentNotFoundException("your deployment with this id:"+deploymentId+"not found"));
+        return deploymentMapper.entityToResponse(deployment);
+    }
+
+    @Override
+    public Page<DeploymentResponseDto> getAllDeploymentsByUserId(Long userId, Pageable pageable) {
+        Page<Deployment> deployments = deploymentRepo.findAllByUserId(userId,pageable);
+        return deployments.map(deploymentMapper::entityToResponse);
+
+    }
+
+    @Override
+    public Deployment findByRepoNameAndUserId(String repoName, Long userId) {
+        return deploymentRepo.findByProjectNameAndUserId(repoName,userId).orElse(null);
     }
 
     private String generateRandomSlug(String baseSlug) {

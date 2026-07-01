@@ -1,16 +1,22 @@
 package com.redhat.deployforge.services;
 
 import com.redhat.deployforge.dtos.CreateDeploymentRequestDto;
+import com.redhat.deployforge.dtos.CreateDeploymentResponseDto;
+import com.redhat.deployforge.dtos.DeploymentResponseDto;
 import com.redhat.deployforge.models.Deployment;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface DeploymentService {
 
-    void createDeployment(CreateDeploymentRequestDto  createDeploymentRequestDto);
-    Optional<Deployment> getDeploymentById(Long deploymentId);
-    List<Deployment> getAllDeploymentsByUserId(Long userId);
+    CreateDeploymentResponseDto createDeployment(
+            CreateDeploymentRequestDto  createDeploymentRequestDto, Long userId);
+    DeploymentResponseDto redeployDeploymentById(Long deploymentId, Long userId);
+    DeploymentResponseDto getDeploymentById(Long deploymentId, Long userId);
+
+    Page<DeploymentResponseDto> getAllDeploymentsByUserId(Long userId, Pageable pageable);
+
+    Deployment findByRepoNameAndUserId(String repoName, Long userId);
 
 
 }

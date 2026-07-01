@@ -1,19 +1,20 @@
 package com.redhat.deployforge.repositories;
 
 import com.redhat.deployforge.models.Deployment;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DeploymentRepo extends JpaRepository<Deployment,Long> {
     boolean existsByRepoUrl(String repoUrl);
 
-    boolean existsByDeploymentSlug(String deploymentSlug);
+    Optional<Deployment> findByProjectNameAndUserId(String repoName,Long userId);
 
-    List<Deployment> findAllByUserId(Long userId, Pageable pageable);
+    Page<Deployment> findAllByUserId(Long userId, Pageable pageable);
 
-    List<Deployment> findAllByUserId(Long userId);
+    Optional<Deployment> findByDeploymentIdAndUserId(Long deploymentId, Long userId);
 }

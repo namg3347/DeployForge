@@ -4,8 +4,7 @@ import com.redhat.deployforge.enums.DeploymentStatus;
 
 public record CreateDeploymentResponseDto(
         String deploymentId,
-        String deploymentUrl,
-        DeploymentStatus deploymentStatus,
-        String errorMessage
+        String deploymentSlug,
+        DeploymentStatus deploymentStatus
 ) {
 }

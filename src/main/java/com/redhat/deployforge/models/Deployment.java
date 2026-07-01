@@ -16,11 +16,11 @@ import java.time.Instant;
 @RequiredArgsConstructor
 @Builder
 @Table(name = "deployments",
-    indexes = {
-            @Index(name = "idx_repo_url" ,columnList = "repo_url"),
-            @Index(name = "idx_user_id",columnList = "user_id")
-
-    })
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"user_id", "repoName"}
+                )
+        })
 public class Deployment {
 
     @Id
@@ -28,13 +28,13 @@ public class Deployment {
     @SequenceGenerator(name = "dpl_seq_gen", sequenceName = "dpls_dpl_id_seq", allocationSize = 1)
     private Long deploymentId;
 
-    @Column(name="user_id",nullable = false,updatable = false,unique = true)
+    @Column(name="user_id",nullable = false,updatable = false)
     private Long userId;
 
     @Column(name = "repo_name",nullable = false,updatable = false)
-    private String repoName;
+    private String projectName;
 
-    @Column(name = "repo_url",nullable = false,updatable = false, unique = true)
+    @Column(name = "repo_url",nullable = false,updatable = false)
     private String repoUrl;
 
     @Column(name = "deployment_slug",unique = true,updatable = false)
@@ -58,7 +58,7 @@ public class Deployment {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "deployment_status", nullable = false)
-    private DeploymentStatus status;
+    private DeploymentStatus deploymentStatus;
 
     @Column(name = "error_message")
     private String errorMessage;
